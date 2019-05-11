@@ -1,6 +1,6 @@
 int led = 13;
 
-//Right Emitters and receivers
+//Right Emitters and receivers-----------------------------------------------------
 int rightEm = A0; //14 // A1
 int rightRec = 15; //15 // A1
 int right; // right sensor reading 
@@ -67,21 +67,31 @@ center = analogRead(centerRec);
 left45 = analogRead(left45Rec);
 left = analogRead(leftRec);
 
+/* int newCenter = map(center, 0, 24, 0, 70); //range of reading: 4-24, range want, 0-250*/
+//no mapping
+Serial.print("mappedCenter: ");
+Serial.print(newCenter);
+Serial.println();
+
 Serial.print("Right: ");
 Serial.println(right);
 Serial.println();
+
 
 Serial.print("Right 45: ");
 Serial.println(right45);
 Serial.println();
 
+
 Serial.print("Center: ");
 Serial.println(center);
 Serial.println();
 
+
 Serial.print("Left 45: ");
 Serial.println(left45);
 Serial.println();
+
 
 Serial.print("Left: ");
 Serial.println(left);
