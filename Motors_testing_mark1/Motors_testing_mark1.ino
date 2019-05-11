@@ -1,12 +1,18 @@
+/*
+ * this testing code for motor output on mechamouse:
+ * main contributers: Matthew Alaniz, Stephnie Cabrera
+ */
+
+int led = 13; // test led
+
+
+//motor functions and variable declarations------------------------------------------------------------------------------------------------------------------------
 //START OF FUNCTION DECLARATIONS
 void rightFor(double);
 void rightRev(double);
 void leftFor(double);
 void leftRev(double); 
 //END OF FUNCTION DECLARATIONS
-
-//LED
-int led = 13;
 
 
 //Right Motor
@@ -25,11 +31,11 @@ int leftMotorRev = 3; // Left Motor Reverse
 //int leftMotorB = 6; // Left Motor B reading
 
 
-void setup() {
-  // put your setup code here, to run once:
-//LED
-pinMode(led,OUTPUT);
 
+//setup, varaiables, as outputs and endputs etc.  --------------------------------------------------------------------------------------------------------------------------
+void setup() {
+ // put your setup code here, to run once:
+//sensor,output--------------------------------------------------------------
 //Right Motor
 pinMode(rightMotorEn, OUTPUT);
 pinMode(rightMotorFor, OUTPUT);
@@ -37,29 +43,39 @@ pinMode(rightMotorRev, OUTPUT);
 //pinMode(rightMotorA, INPUT);
 //pinMode(rightMotorB, INPUT);
 
+
+
 //Left Motor
 pinMode(leftMotorEn, OUTPUT);
 pinMode(leftMotorFor, OUTPUT);
 pinMode(leftMotorRev, OUTPUT);
 //pinMode(leftMotorA, INPUT);
 //pinMode(leftMotorB, INPUT);
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
 
 //LED
-digitalWrite(led,HIGH);
+pinMode(led, OUTPUT); // test led
 
-//Right Forward 
+
+}
+
+//main loop ----------------------------------------------------------------------------------------------------------------------
+void loop() {
+  // put your main code here, to run repeatedly
+
 rightFor(150);
+leftFor(150);
+
+//start-----------
+//follow through with rest of agorithm
+//Right Forward 
+//rightFor(150);
 
 
 //Left Forward
-(100);
-leftFor(150);
-}
+//(100);
+//leftFor(150);
 
+}
 void rightFor(double rightSpeed){
   digitalWrite(rightMotorEn, HIGH);
   digitalWrite(rightMotorRev, LOW);
@@ -86,3 +102,4 @@ void leftRev(double leftSpeed){
 }
 
 
+  
