@@ -1,6 +1,7 @@
 /*
  * this code for main mechmouse by Rat pack 
  * main contributers: Matthew Alaniz, Stephanie Cabrera
+ * **this a old agorithm , been scrapeed 
  */
 
 int led = 13; // test led
