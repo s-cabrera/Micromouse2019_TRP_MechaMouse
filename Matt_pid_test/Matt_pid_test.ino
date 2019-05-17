@@ -4,10 +4,7 @@
  */
 
 int led = 13; // test led
-const int startOff = 0;//calibrate value through testing, valye reqired for center sensor to turn on
-unsigned int startFlag = 0;
 
-void startState(int);//function declaration for start, intilize agorithm
 
 //Right Emitters and receivers -------------------------------------------------------------------------------------------------------------------------
 int rightEm = A0; //14 // A1
@@ -59,7 +56,20 @@ int leftMotorRev = 3; // Left Motor Reverse
 //int leftMotorA = 5; // Left Motor A reading
 //int leftMotorB = 6; // Left Motor B reading
 
+//pid function declaration--------------------------------
 
+void two_wall_pid(int leftIr, int rightIr);
+
+unsigned int leftset = 68, rightSet = 900;
+unsigned int leftError = 0, rightError = 0;
+unsigned int leftOutput = 0, rightOutput = 0;
+unsigned int leftSet = 0, righSet = 0;
+unsigned int right_errorsum = 0, left_errorsum = 0;
+unsigned int left_errorOutput = 0;
+unsigned int right_errorOutput = 0;  
+unsigned int  right_DError = 0, left_DError = 0;
+unsigned int left_lastError = 0, right_lastError = 0;
+unsigned int preTime = millis();
 
 
 //setup, varaiables, as outputs and endputs etc.  --------------------------------------------------------------------------------------------------------------------------
@@ -74,6 +84,7 @@ pinMode(rightMotorRev, OUTPUT);
 //pinMode(rightMotorB, INPUT);
 
 
+
 //Left Motor
 pinMode(leftMotorEn, OUTPUT);
 pinMode(leftMotorFor, OUTPUT);
@@ -85,7 +96,7 @@ pinMode(leftMotorRev, OUTPUT);
 pinMode(led, OUTPUT); // test led
 
 // sensors setup---------------------------------------------------------------
-//Serial.begin(9600);
+Serial.begin(9600);
 //Receivers
 pinMode(rightRec, INPUT);
 pinMode(right45Rec, INPUT);
@@ -99,8 +110,11 @@ pinMode(right45Em, OUTPUT);
 pinMode(centerEm, OUTPUT);
 pinMode(left45Em, OUTPUT);
 pinMode(leftEm, OUTPUT);
-}
 
+
+
+
+}
 
 //main loop ----------------------------------------------------------------------------------------------------------------------
 void loop() {
@@ -108,42 +122,80 @@ void loop() {
 
 //LED
 digitalWrite(led,HIGH);
+//Emitters
+digitalWrite(rightEm, HIGH);
+digitalWrite(right45Em, HIGH);
+digitalWrite(centerEm, HIGH);
+digitalWrite(left45Em, HIGH);
+digitalWrite(leftEm, HIGH);
+
+rightFor(150);
+leftFor(150);
+
+unsigned int currentMillis = millis();
+while((millis() - currentMillis) > 1500){}
+
+while(1){
+//Receiver Readings
+right = analogRead(rightRec);
+//right45 = analogRead(right45Rec);
+center = analogRead(centerRec);
+//left45 = analogRead(left45Rec);
+left = analogRead(leftRec);
+
+Serial.print("Right: ");
+Serial.println(right);
+Serial.println();
+
+
+Serial.print("Center: ");
+Serial.println(center);
+Serial.println();
+
+
+
+Serial.print("Left: ");
+Serial.println(left);
+Serial.println();
+
+
+two_wall_pid( left, right);
+
+analogWrite(rightMotorFor, right_errorOutput);
+analogWrite(leftMotorFor, left_errorOutput);
+
+Serial.print("leftOutput: ");
+Serial.println(left_errorOutput);
+Serial.println(leftMotorFor, left_errorOutput);
+
+Serial.print("rightOutput: ");
+Serial.println(right_errorOutput);
+Serial.println(rightMotorFor, right_errorOutput);
+
 
 
 
 //start-----------
-center = analogRead(centerRec);
-if(center > startOff){
-
-  startState(center);
-}
-
-while(startFlag){//follow through with rest of agorithm
+//follow through with rest of agorithm
 //Right Forward 
-rightFor(150);
+//rightFor(150);
 
 
 //Left Forward
-(100);
-leftFor(150);
-}
+//(100);
+//leftFor(150);
+
+preTime = millis();
 }
 
-void startState(int reading){
-  startFlag = 0;
-  int tempCenterA = analogRead(center);
-  unsigned int prevMillis = millis();
-  while( millis() - prevMillis > 3){}
-  int tempCenterB = analogRead(center);
-  if(tempCenterB - tempCenterA < 100){
-    startFlag = 1;
-  }
 }
+
+
 
 void rightFor(double rightSpeed){
   digitalWrite(rightMotorEn, HIGH);
   digitalWrite(rightMotorRev, LOW);
-  analogWrite(rightMotorFor, rightSpeed);
+  analogWrite(rightMotorFor, rightSpeed);bn  
 }
 
 void leftFor(double leftSpeed){
@@ -165,4 +217,48 @@ void leftRev(double leftSpeed){
   analogWrite(leftMotorRev, leftSpeed);
 }
 
+
+
+void two_wall_pid(int leftIr,int rightIr){
+  unsigned int kp;
+  unsigned int kd;
+  unsigned int ki;
+  //proportional error--------------------------
+  if(leftIr > leftSet){
+    leftError = leftIr - leftSet;
+  }
+  else if(leftIr < leftSet){
+    leftError = leftSet - leftIr;
+  }
+  if(rightIr > rightSet){
+    rightError = rightIr - rightSet;
+  }
+  else if(rightIr < rightSet){
+    leftError = rightSet - rightIr;
+  }
+  
+ //derivative error----------------------------------------------
+unsigned int  timeChange = millis()  - preTime;
+  if(leftError > rightError){
+      left_DError = (leftError - left_lastError)/timeChange;
+  }
+ if(leftError < rightError){
+  right_DError = (rightError - right_lastError)/timeChange;
+ }
+//integrl error-----------------------------------------------
+  if(leftError > rightError){
+  left_errorsum += ( leftError * timeChange);
+  }
+ if(leftError < rightError){
+  right_errorsum += (rightError * timeChange);
+ }
+ //
+//outputing as motor value----------------------------------------
+  left_errorOutput = kp*leftError + kd * left_DError + ki*left_errorsum;
+  right_errorOutput = kp * rightError + kd * left_DError + ki*left_errorsum;
+
+  left_lastError = leftError;
+  right_lastError = rightError;
+  
+  }
 

@@ -1,13 +1,21 @@
-/*
- * this code for main mechmouse by Rat pack 
- * main contributers: Matthew Alaniz, Stephanie Cabrera
- */
-
-int led = 13; // test led
-const int startOff = 0;//calibrate value through testing, valye reqired for center sensor to turn on
-unsigned int startFlag = 0;
+//START OF FUNCTION DECLARATIONS
 
 void startState(int);//function declaration for start, intilize agorithm
+
+//Motors
+void rightFor(double);
+void rightRev(double);
+void leftFor(double);
+void leftRev(double); 
+
+//END OF FUNCTION DECLARATIONS
+
+//LED
+int led = 13; // test led
+const int startOff = 3;
+unsigned int startFlag = 0;
+
+
 
 //Right Emitters and receivers -------------------------------------------------------------------------------------------------------------------------
 int rightEm = A0; //14 // A1
@@ -35,15 +43,6 @@ int leftRec = 23; // 23 // A9
 int left; //left sensor reading
 
 
-//motor functions and variable declarations------------------------------------------------------------------------------------------------------------------------
-//START OF FUNCTION DECLARATIONS
-void rightFor(double);
-void rightRev(double);
-void leftFor(double);
-void leftRev(double); 
-//END OF FUNCTION DECLARATIONS
-
-
 //Right Motor
 int rightMotorEn = 8; // Right Motor Enable
 int rightMotorFor = 9; // Right Motor Forward
@@ -59,10 +58,24 @@ int leftMotorRev = 3; // Left Motor Reverse
 //int leftMotorA = 5; // Left Motor A reading
 //int leftMotorB = 6; // Left Motor B reading
 
+void gostraight(){
+  rightFor(150);
+  leftFor(150);
+}
+
+void turnleft(){
+  rightFor(120);
+  leftFor(150);
+}
+
+void turnright(){
+  rightFor(150);
+  leftFor(120);
+}
 
 
 
-//setup, varaiables, as outputs and endputs etc.  --------------------------------------------------------------------------------------------------------------------------
+//setup, variables, as outputs and endputs etc.  --------------------------------------------------------------------------------------------------------------------------
 void setup() {
  // put your setup code here, to run once:
 //sensor,output--------------------------------------------------------------
@@ -73,7 +86,8 @@ pinMode(rightMotorRev, OUTPUT);
 //pinMode(rightMotorA, INPUT);
 //pinMode(rightMotorB, INPUT);
 
-
+//seed random
+randomSeed(millis()+1);
 //Left Motor
 pinMode(leftMotorEn, OUTPUT);
 pinMode(leftMotorFor, OUTPUT);
@@ -101,44 +115,125 @@ pinMode(left45Em, OUTPUT);
 pinMode(leftEm, OUTPUT);
 }
 
+int stateSM[] = {0, 1};
+int state = stateSM[0];
+int startTimer = 0; // this is the timer value to determine whether the value is being held for over 3 seconds
+void Tick(){
+  Serial.print("State: ");
+  Serial.println(state);
+  Serial.print("Timer: ");
+  Serial.println(startTimer);
+  Serial.print("Center: ");
+  Serial.println(center);
+ // delay(500);
+// Transitions 
+ switch(state){
+
+  case 0: 
+  delay(1000);
+  if((center > 30) && (startTimer > 3000)){ // if the value of center to be greater  
+  //is less than 3 seconds stay in the Start state, else state = go // the center needs to hold a value over 80 for three seconds
+    state = stateSM[1];
+  }
+  else{
+    if(center > 30 && startTimer < 3000){
+      startTimer = millis() + startTimer;
+      Serial.print("Timer");
+      Serial.println(startTimer);
+      state = stateSM[0];
+      }
+    else{
+     startTimer = 0;
+     state = stateSM[0];
+    }
+  }
+  break;
+
+  case 1:
+  state = stateSM[1];
+  break;
+
+  default:
+  break;
+ }
+
+//States
+switch(state){
+  case 0: 
+  break;
+
+  case 1: 
+ //unsigned int choice = random(1);
+    rightFor(200);
+    leftFor(200);
+    if( (left > 45) && (right > 750) && (center < 30)){
+      gostraight();
+    }
+    else if((left < 30) && (right > 750) && (center > 30)){
+      turnleft();
+    }
+    Serial.print("Right: ");
+Serial.println(right);
+Serial.println();
+
+
+Serial.print("Center: ");
+Serial.println(center);
+Serial.println();
+
+Serial.print("Left: ");
+Serial.println(left);
+Serial.println();
+
+/*    else if((left > 30) && (right < 750) && (center >30){
+      turnRight();
+    }*/
+    //else if( (left > 30) && (right < 750) && (center < 30){
+    // if(choice == 0){
+    // turnright();
+    //}
+    //if(choice == 1){
+    // turnleft();
+    //}
+    else{gostraight();
+    }
+  break;
+
+  default:
+  break;
+  
+  }
+}
+
 
 //main loop ----------------------------------------------------------------------------------------------------------------------
-void loop() {
+void loop(){
   // put your main code here, to run repeatedly:
 
 //LED
 digitalWrite(led,HIGH);
 
-
-
-//start-----------
+// States
+digitalWrite(centerEm, HIGH);
 center = analogRead(centerRec);
-if(center > startOff){
-
-  startState(center);
+Serial.print("Center: ");
+Serial.println(center);
+Tick();
 }
-
-while(startFlag){//follow through with rest of agorithm
-//Right Forward 
-rightFor(150);
-
-
-//Left Forward
-(100);
-leftFor(150);
-}
-}
-
-void startState(int reading){
-  startFlag = 0;
-  int tempCenterA = analogRead(center);
-  unsigned int prevMillis = millis();
-  while( millis() - prevMillis > 3){}
-  int tempCenterB = analogRead(center);
-  if(tempCenterB - tempCenterA < 100){
-    startFlag = 1;
-  }
-}
+//start-----------
+//center = analogRead(centerRec);
+//
+//  if(center > startOff){
+//    startState(center);
+//  }
+//
+//void startState(int reading){
+//  unsigned int prevMillis = millis(); // 
+//  while( millis() - prevMillis > 3){}
+//  if(tempCenterB - tempCenterA < 100){
+//    startFlag = 1;
+//  }
+//}
 
 void rightFor(double rightSpeed){
   digitalWrite(rightMotorEn, HIGH);
@@ -164,5 +259,4 @@ void leftRev(double leftSpeed){
   digitalWrite(leftMotorFor, LOW);
   analogWrite(leftMotorRev, leftSpeed);
 }
-
 
