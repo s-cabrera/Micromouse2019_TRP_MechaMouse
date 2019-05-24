@@ -276,41 +276,38 @@ int Maze_SM[] = {0, 1, 2, 3};
 int Dicision_state = stateSM[0];
 
 void mazesolve(){
-  unsigned int wall = 0; // vaiable to tell us if one or two walls;
+  
   if ( startFlag == 1){
-    switch(Dicision_state){
+    switch(Dicision_state){ //transistions---------------------------
       case 0:
         if ( (left > 200) && (right > 200) && ( center < 200)){ // when wall on left and right
          // state = go_straight;
         }
-        if ( (left > 200) && (right < 200) && ( center < 200)){ // when wall on left 
-          if(millis()%3 == 1){
+        
+       else  if ( (left > 200) && (right < 200) && ( center < 200)){ // when wall on left 
+          if(millis()% 2 == 1){
            // state = turn_right; 
-            wall = 2;
           }
           else{
           //state = go_straight;
-          wall = 2;
           }
         }
-        if( (left < 200) && (right > 200) && ( center < 200)){ // when wall on right
-           if(millis()% 4== 3){
+        
+        else if( (left < 200) && (right > 200) && ( center < 200)){ // when wall on right
+           if(millis()% 2 == 1){
             //state = turn_left;
-            wall = 2;
           }
           else{
             //state = go_straight;
-            wall = 2;
           }
         }
-        if((left < 200) && (right < 200) && ( center > 200)){ // when wall on the front
-          if(millis() % 2 == 5){
+        
+        else if((left < 200) && (right < 200) && ( center > 200)){ // when wall on the front
+          if(millis() % 2 == 0){
            //dicision_state = turn_left;
-           wall = 2;
            }
           else{
             //dicision_state_turn_right;
-            wall = 2;
           }
         }
       break;
@@ -321,20 +318,38 @@ void mazesolve(){
       break;
       case 3:// dicision_state = dicision;
       break;
-    }
-    switch(Dicision_state){
+    }//transistions
+    switch(Dicision_state){// actions---------------
       case 0:
       break;
-      case 1:
-      //call Pid // check if wall =2, if yes call one-wall PID if not call two wall PID
+      case 1:// go straiht
+      //call two wall pid
       break;
-      case 2:
-       //call function to run left, call Pid // check if wall =2, if yes call one-wall PID if not call two wall PID
+      case 2:// go left
+       //call one wall pid
       break;
-      case 3:
-       //call function to turn right, call Pid // check if wall =2, if yes call one-wall PID if not call two wall PID
+      case 3:// 
+       //call one wall pid
       break;
+    }//actions
+  }
+}
+
+
+afterturn {
+  unsigned int pid_delay_time = 5000;
+  unsigned cnt;
+  while(pid_delay_time > cnt){
+    if( left> 200 && right < 200){
+      //onewallpid_right
     }
+    else if( left < 200 && right > 200){
+      //onewallpid_left
+    }
+    else{
+    }//two wall pid
+    ++cnt;
+  }
   }
 }
 
